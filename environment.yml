@@ -1,0 +1,5 @@
+name: trail_log
+channels:
+  - conda-forge
+dependencies:
+  - nodejs=22

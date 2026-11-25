@@ -10,4 +10,4 @@ export function formatMiles(miles: number): string{
 
 export function formatStars(rating: number): string{
     return "★".repeat(rating) + "☆".repeat(5- rating);
-}//turns 3 into "★★★☆☆" 
+}//turns 3 into "★★★☆☆"

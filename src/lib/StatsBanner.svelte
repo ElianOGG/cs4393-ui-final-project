@@ -41,7 +41,7 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 24px;
-        padding: 26px 32px;
+        padding: 26px max(32px, calc((100% - 1200px) / 2));
         color: var(--cream);
         background: var(--banner);
     }

@@ -4,7 +4,7 @@ export type Hike = {
     id: number;
     name: string;
     location: string;
-    date: string; //yyyymmdd
+    date: string; //yyyy-mm-dd
     distance: number | null; //will be in miles
     difficulty: Difficulty | null;
     rating: number; // out of 5, 0 is not rated

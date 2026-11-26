@@ -2,13 +2,19 @@
     import {onMount} from "svelte";
     import GalleryView from "#lib/GalleryView.svelte";
     import HikeForm from "#lib/HikeForm.svelte";
+    import StatsBanner from "#lib/StatsBanner.svelte";
+    import Badge from "#lib/Badge.svelte";
+    import mountains from "#lib/assets/mountains.png";
+    import {formatDate, formatMiles, formatStars} from "#lib/format.ts";
     import {loadHikes, saveHikes, type Hike} from "#lib/hikes.ts";
 
-    type View = "gallery" | "favorites" | "add";
+    type View = "gallery" | "favorites" | "add" | "detail" | "edit" | "stats";
+    type ListView = "gallery" | "favorites" | "stats";
 
-    const links: {id: View; label: string}[] = [
+    const links: {id: ListView; label: string}[] = [
         {id: "gallery", label: "My Hikes"},
-        {id: "favorites", label: "Favorites"}
+        {id: "favorites", label: "Favorites"},
+        {id: "stats", label: "Stats"}
     ];
 
     let hikes: Hike[] = $state([]);
@@ -17,21 +23,62 @@
     let search = $state("");
     let mobileOpen = $state(false);//for narrow windows
 
+    let selectedId: number | null = $state(null);
+    let returnTo: ListView = $state("gallery");//where the detail page's back button goes
+
     let showSearch = $derived(view === "gallery" || view === "favorites");
+
+    //look the hike up by id so it's always the live object inside hikes, not a stale copy
+    let selected = $derived(hikes.find((hike) => hike.id === selectedId) ?? null);
+
+    //highest rating wins, unrated (0) hikes are skipped, ties go to the most recent date
+    let topRated = $derived(getTopRated(hikes));
+
+    function getTopRated(hikes: Hike[]): Hike | null{
+        let best: Hike | null = null;
+        for(const hike of hikes){
+            if(hike.rating <= 0) continue;
+            if(best === null || hike.rating > best.rating || (hike.rating === best.rating && hike.date > best.date)){
+                best = hike;
+            }
+        }
+        return best;
+    }
 
     function go(next: View){
         view = next;
         mobileOpen = false;
+        if(next === "gallery" || next === "favorites" || next === "stats"){
+            returnTo = next;
+        }
         window.scrollTo(0, 0);
     }
 
-    //TODO MARTIN: open the hike detail page
     function openHike(hike: Hike){
-        console.log("open", hike.name);
+        selectedId = hike.id;
+        go("detail");
     }
 
     function saveHike(hike: Hike){
-        hikes.unshift(hike);
+        const index = hikes.findIndex((other) => other.id === hike.id);
+        if(index === -1){
+            hikes.unshift(hike);
+            go("gallery");
+        }else{
+            hikes[index] = hike;
+            selectedId = hike.id;
+            go("detail");
+        }
+    }//a new id gets added to the top, an existing id replaces that hike
+
+    function toggleFavorite(hike: Hike){
+        hike.favorite = !hike.favorite;
+    }//hike is the deep $state proxy, so the save $effect picks this up
+
+    function deleteHike(hike: Hike){
+        if(!confirm(`Delete "${hike.name}"? This can't be undone.`)) return;
+        hikes = hikes.filter((other) => other.id !== hike.id);
+        selectedId = null;
         go("gallery");
     }
 
@@ -80,6 +127,77 @@
 
     {#if view === "add"}
         <HikeForm hike={null} onsave={saveHike} oncancel={() => go("gallery")} />
+    {:else if view === "edit" && selected}
+        <HikeForm hike={selected} onsave={saveHike} oncancel={() => go("detail")} />
+    {:else if view === "detail" && selected}
+        <main class="page detail_page">
+            <button class="back" onclick={() => go(returnTo)}>
+                ← Back to {returnTo === "favorites" ? "Favorites" : returnTo === "stats" ? "Stats" : "My Hikes"}
+            </button>
+
+            <div class="panel detail">
+                <div class="detail_photo">
+                    <img src={selected.photo ?? mountains} alt={selected.name} />
+                    {#if selected.difficulty}
+                        <div class="badge_spot"><Badge difficulty={selected.difficulty} /></div>
+                    {/if}
+                </div>
+
+                <div class="detail_info">
+                    <h1>{selected.name}</h1>
+                    {#if selected.location}
+                        <p class="location">{selected.location}</p>
+                    {/if}
+                    <p class="detail_stars" aria-label="{selected.rating} out of 5 stars">
+                        {selected.rating > 0 ? formatStars(selected.rating) : "Not rated"}
+                    </p>
+
+                    <dl class="facts">
+                        <div>
+                            <dt class="label">Date completed</dt>
+                            <dd>{formatDate(selected.date)}</dd>
+                        </div>
+                        <div>
+                            <dt class="label">Distance</dt>
+                            <dd>{selected.distance !== null ? formatMiles(selected.distance) : "—"}</dd>
+                        </div>
+                        <div>
+                            <dt class="label">Difficulty</dt>
+                            <dd>{selected.difficulty ?? "—"}</dd>
+                        </div>
+                    </dl>
+
+                    <span class="label">Notes</span>
+                    <p class="notes">{selected.notes || "No notes yet."}</p>
+
+                    <div class="detail_buttons">
+                        <button class="orange" onclick={() => toggleFavorite(selected!)}>
+                            {selected.favorite ? "★ Favorited" : "☆ Favorite"}
+                        </button>
+                        <button class="plain" onclick={() => go("edit")}>Edit</button>
+                        <button class="danger" onclick={() => deleteHike(selected!)}>Delete</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    {:else if view === "stats"}
+        <StatsBanner {hikes} title="Your hiking stats" subtitle="How far you've come, one trail at a time." />
+        <main class="page">
+            <span class="label">Highest rated hike</span>
+            {#if topRated}
+                <button class="panel top_rated" onclick={() => openHike(topRated!)}>
+                    <img src={topRated.photo ?? mountains} alt={topRated.name} />
+                    <div>
+                        <h2>{topRated.name}</h2>
+                        <p class="location">{topRated.location}</p>
+                        <p class="detail_stars">{formatStars(topRated.rating)}</p>
+                        <p class="location">{formatDate(topRated.date)}</p>
+                    </div>
+                </button>
+            {:else}
+                <p class="empty">Rate a hike to see your favorite trail here.</p>
+            {/if}
+        </main>
     {:else}
         <GalleryView {hikes} {search} favoritesOnly={view === "favorites"} onopen={openHike} />
     {/if}
@@ -235,9 +353,138 @@
         border: 1px solid var(--cream);
     }
 
+    .detail_page{
+        max-width: 1064px;
+    }
+
+    .detail{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 26px;
+        margin-top: 14px;
+    }
+
+    .detail_photo{
+        position: relative;
+        min-height: 320px;
+    }
+
+    .detail_photo img{
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .badge_spot{
+        position: absolute;
+        top: 10px;
+        left: 10px;
+    }
+
+    .detail_info h1{
+        margin: 0;
+        font-size: 30px;
+        color: var(--forest);
+    }
+
+    .location{
+        margin: 4px 0 0 0;
+        font-size: 14px;
+        color: var(--label);
+    }
+
+    .detail_stars{
+        margin: 10px 0 0 0;
+        font-size: 20px;
+        letter-spacing: 1px;
+        color: var(--orange);
+    }
+
+    .facts{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin: 20px 0;
+    }
+
+    .facts dd{
+        margin: 0;
+        font-size: 15px;
+    }
+
+    .notes{
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
+
+    .detail_buttons{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+    .top_rated{
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+        max-width: 640px;
+        text-align: left;
+        color: var(--charcoal);
+        border: none;
+    }
+
+    .top_rated img{
+        width: 180px;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    .top_rated h2{
+        margin: 0;
+        font-size: 20px;
+        color: var(--forest);
+    }
+
+    .top_rated:hover h2{
+        text-decoration: underline;
+    }
+
+    .empty{
+        padding: 24px 0;
+        color: var(--label);
+    }
+
+    @media (max-width: 760px){
+        .detail{
+            grid-template-columns: 1fr;
+        }
+
+        .detail_photo{
+            min-height: 240px;
+        }
+    }
+
     @media (max-width: 640px){
         :global(.page){
             padding: 16px;
+        }
+
+        .facts{
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .top_rated{
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .top_rated img{
+            width: 100%;
         }
 
         .topbar{

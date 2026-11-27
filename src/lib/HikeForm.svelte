@@ -2,6 +2,7 @@
     import {onMount} from "svelte";
     import {DIFFICULTIES, readPhoto, type Difficulty, type Hike} from "#lib/hikes.ts";
     import camera from "#lib/assets/camera.png";
+    import {today} from "#lib/format.ts";
 
 
     let {hike, onsave, oncancel}: {
@@ -12,7 +13,7 @@
 
     let name = $state("");
     let location = $state("");
-    let date = $state("");
+    let date = $state(today());
     let distance: number | null = $state(null);
     let difficulty: Difficulty | null = $state(null);
     let rating = $state(0);

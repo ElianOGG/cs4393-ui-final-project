@@ -11,3 +11,10 @@ export function formatMiles(miles: number): string{
 export function formatStars(rating: number): string{
     return "★".repeat(rating) + "☆".repeat(5- rating);
 }//turns 3 into "★★★☆☆"
+
+export function today(): string{
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${now.getFullYear()}-${month}-${day}`;
+}//gets today's date, and uses the local time so that it never jumps to a different day

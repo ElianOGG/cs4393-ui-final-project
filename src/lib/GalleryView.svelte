@@ -17,6 +17,7 @@
 
     let filter: Filter = $state("All");
     let sort: Sort = $state("newest");
+    let favorites = $derived(hikes.filter((hike) => hike.favorite));//shows only the fav hike stats in the fav screen
 
     //the hikes that pass every filter, in the chosen order
     let shown = $derived(getShown(hikes, favoritesOnly, filter, search, sort));
@@ -50,7 +51,7 @@
 </script>
 
 {#if favoritesOnly}
-    <StatsBanner {hikes} title="Your favorite hikes" subtitle="The trails worth hiking again." />
+    <StatsBanner hikes={favorites} title="Your favorite hikes" subtitle="The trails worth hiking again." />
 {:else}
     <StatsBanner {hikes} title="Welcome back, hiker" subtitle="Every trail you've finished, all in one place." />
 {/if}

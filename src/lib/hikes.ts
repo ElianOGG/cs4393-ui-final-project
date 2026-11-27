@@ -52,7 +52,7 @@ export function saveHikes(hikes: Hike[]): boolean{
         localStorage.setItem(STORAGE_KEY, JSON.stringify(hikes));
         return true;
     }catch{
-        alert("Error: Could not save! The photos might be too big.");
+        alert("Error: Could not save! The photo might be too big, so your last change was undone.");
         return false;
     }
 }//returns false when it couldn't save so that the page can undo the change

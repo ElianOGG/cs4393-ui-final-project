@@ -24,6 +24,6 @@
 
     .hard{
         background: var(--hard);
-        color: #FFFFFF;
+        color: var(--white);
     }
 </style>

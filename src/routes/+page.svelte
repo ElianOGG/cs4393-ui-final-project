@@ -215,8 +215,8 @@
     :global(body){
         margin: 0;
         font-family: Arial, Helvetica, sans-serif;
-        color: #2B2B2B;
-        background: #F3EDE0;
+        color: var(--charcoal);
+        background: var(--cream);
     }
 
     :global(button){
@@ -259,7 +259,7 @@
     }
 
     :global(.orange:hover){
-        background: #C47222;
+        background: var(--orange-hover);
     }
 
     :global(.plain){
@@ -269,7 +269,7 @@
     }
 
     :global(.danger){
-        color: #FFFFFF;
+        color: var(--white);
         background: var(--hard);
     }
 
@@ -285,7 +285,7 @@
         text-decoration: underline;
     }
 
-    .app{
+    :global(:root){
         --forest: #2F4F3A;
         --banner: #3B5E46;
         --bark: #6B4F36;
@@ -293,15 +293,21 @@
         --cream: #F3EDE0;
         --card: #FFFDF8;
         --orange: #D9822B;
+        --orange-hover: #C47222;
         --charcoal: #2B2B2B;
+        --white: #FFFFFF;
         --input-border: #CBB99A;
         --easy: #8BA888;
         --moderate: #C9A227;
         --hard: #A64B2A;
         --drop: #EDE3D1;
-
-        min-height: 100vh;
+        --drop-hover: #E5D8C0;
+        --stat-box: rgba(243, 237, 224, 0.15);
     }/*Style colors from the guide*/
+
+    .app{
+        min-height: 100vh;
+    }
 
     .topbar{
         position: relative;

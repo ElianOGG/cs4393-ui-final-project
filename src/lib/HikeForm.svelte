@@ -241,7 +241,7 @@
         padding: 8px 10px;
         font-family: inherit;
         font-size: 14px;
-        background: #FFFFFF;
+        background: var(--white);
         border: 1px solid var(--input-border);
     }
 
@@ -264,7 +264,7 @@
         margin: 0 0 16px 0;
         padding: 10px 14px;
         font-weight: bold;
-        color: #FFFFFF;
+        color: var(--white);
         background: var(--hard);
     }
 
@@ -287,7 +287,7 @@
     }
 
     .dropzone:hover, .dropzone.dragging{
-        background: #E5D8C0;
+        background: var(--drop-hover);
     }
 
     .dropzone.has_photo{
@@ -325,7 +325,7 @@
         height: 34px;
         font-size: 14px;
         font-weight: bold;
-        background: #FFFFFF;
+        background: var(--white);
         border: 1px solid;
     }
 
@@ -334,7 +334,7 @@
     .hard{ border-color: var(--hard); }
     .easy.selected{ background: var(--easy); }
     .moderate.selected{ background: var(--moderate); }
-    .hard.selected{ background: var(--hard); color: #FFFFFF; }
+    .hard.selected{ background: var(--hard); color: var(--white); }
 
     .star{
         padding: 0 2px;

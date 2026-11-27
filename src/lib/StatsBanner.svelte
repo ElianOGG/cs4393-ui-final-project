@@ -65,7 +65,7 @@
     .box{
         min-width: 118px;
         padding: 12px 16px;
-        background: rgba(243, 237, 224, 0.15);
+        background: var(--stat-box);
     }
 
     .box strong{

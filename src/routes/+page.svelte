@@ -79,7 +79,7 @@
         if(!confirm(`Delete "${hike.name}"? This can't be undone.`)) return;
         hikes = hikes.filter((other) => other.id !== hike.id);
         selectedId = null;
-        go("gallery");
+        go(returnTo);
     }
 
     let lastSaved: string | null = null;

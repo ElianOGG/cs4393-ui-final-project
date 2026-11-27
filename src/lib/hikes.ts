@@ -46,14 +46,16 @@ export function loadHikes(): Hike[]{
     }
 }
 
-export function saveHikes(hikes: Hike[]): void{
-    if(typeof localStorage === "undefined") return;
+export function saveHikes(hikes: Hike[]): boolean{
+    if(typeof localStorage === "undefined") return true;
     try{
         localStorage.setItem(STORAGE_KEY, JSON.stringify(hikes));
+        return true;
     }catch{
         alert("Error: Could not save! The photos might be too big.");
+        return false;
     }
-}
+}//returns false when it couldn't save so that the page can undo the change
 
 export function readPhoto(file: File): Promise<string>{
     return new Promise((resolve, reject) => {

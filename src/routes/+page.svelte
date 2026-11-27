@@ -95,8 +95,12 @@
         const serialized = JSON.stringify(hikes);
         if(serialized === lastSaved) return;
         lastSaved = serialized;
-        saveHikes(hikes);
-    });//save it whenever anything changes
+        if(!saveHikes(hikes)){
+            if(lastSaved !== null) hikes = JSON.parse(lastSaved);
+            return;
+        }
+        lastSaved = serialized;
+    });//save it whenever anything changes, but put the last saved hike back if it fails
 </script>
 
 <svelte:head>

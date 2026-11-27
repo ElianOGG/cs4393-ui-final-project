@@ -94,7 +94,6 @@
         if(!loaded) return;
         const serialized = JSON.stringify(hikes);
         if(serialized === lastSaved) return;
-        lastSaved = serialized;
         if(!saveHikes(hikes)){
             if(lastSaved !== null) hikes = JSON.parse(lastSaved);
             return;

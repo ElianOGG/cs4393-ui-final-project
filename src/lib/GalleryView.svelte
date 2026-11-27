@@ -35,7 +35,7 @@
         }
 
         if(sort === "oldest"){
-            return list.sort((a, b) => a.date.localeCompare(b.name));
+            return list.sort((a, b) => a.date.localeCompare(b.date));
         }else if(sort === "distance"){
             return list.sort((a, b) => (b.distance ?? 0) - (a.distance ?? 0));
         }else if(sort === "difficulty"){

@@ -11,7 +11,7 @@
     } = $props();
 
     type Filter = Difficulty | "All";
-    type Sort = "newest" | "distance" | "difficulty";
+    type Sort = "newest" | "oldest" | "distance" | "difficulty";
 
     const filters: Filter[] = ["All", ...DIFFICULTIES];
 
@@ -34,7 +34,9 @@
             list = list.filter((hike) => hike.name.toLowerCase().includes(text));
         }
 
-        if(sort === "distance"){
+        if(sort === "oldest"){
+            return list.sort((a, b) => a.date.localeCompare(b.name));
+        }else if(sort === "distance"){
             return list.sort((a, b) => (b.distance ?? 0) - (a.distance ?? 0));
         }else if(sort === "difficulty"){
             return list.sort((a, b) => difficultyRank(a) - difficultyRank(b));
@@ -70,6 +72,7 @@
             Sort by
             <select bind:value={sort}>
                 <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
                 <option value="distance">Distance</option>
                 <option value="difficulty">Difficulty</option>
             </select>

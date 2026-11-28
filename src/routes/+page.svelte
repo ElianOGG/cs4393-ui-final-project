@@ -7,6 +7,7 @@
     import mountains from "#lib/assets/mountains.png";
     import {formatDate, formatMiles, formatStars} from "#lib/format.ts";
     import {loadHikes, saveHikes, type Hike} from "#lib/hikes.ts";
+    import MoreStats from "#lib/MoreStats.svelte";
 
     type View = "gallery" | "favorites" | "add" | "detail" | "edit" | "stats";
     type ListView = "gallery" | "favorites" | "stats";
@@ -39,6 +40,19 @@
         for(const hike of hikes){
             if(hike.rating <= 0) continue;
             if(best === null || hike.rating > best.rating || (hike.rating === best.rating && hike.date > best.date)){
+                best = hike;
+            }
+        }
+        return best;
+    }
+
+    //Ties go to the most recent date
+    let longest = $derived(getLongest(hikes));
+    function getLongest(hikes: Hike[]): Hike | null{
+        let best: Hike | null = null;
+        for(const hike of hikes){
+            if(hike.distance === null) continue;
+            if(best === null || hike.distance > (best.distance ?? 0) || (hike.distance === best.distance && hike.date > best.date)){
                 best = hike;
             }
         }
@@ -105,6 +119,18 @@
 <svelte:head>
     <title>Trail Log</title>
 </svelte:head>
+
+{#snippet highlight(hike: Hike, fact: string)}
+    <button class="panel top_rated" onclick={() => openHike(hike)}>
+        <img src={hike.photo ?? mountains} alt={hike.name} />
+        <div>
+            <h2>{hike.name}</h2>
+            <p class="location">{hike.location}</p>
+            <p class="detail_stars">{fact}</p>
+            <p class="location">{formatDate(hike.date)}</p>
+        </div>
+    </button>
+{/snippet}
 
 <div class="app">
     <header class="topbar">
@@ -186,20 +212,25 @@
     {:else if view === "stats"}
         <StatsBanner {hikes} title="Your hiking stats" subtitle="How far you've come, one trail at a time." />
         <main class="page">
-            <span class="label">Highest rated hike</span>
-            {#if topRated}
-                <button class="panel top_rated" onclick={() => openHike(topRated!)}>
-                    <img src={topRated.photo ?? mountains} alt={topRated.name} />
-                    <div>
-                        <h2>{topRated.name}</h2>
-                        <p class="location">{topRated.location}</p>
-                        <p class="detail_stars">{formatStars(topRated.rating)}</p>
-                        <p class="location">{formatDate(topRated.date)}</p>
-                    </div>
-                </button>
-            {:else}
-                <p class="empty">Rate a hike to see your favorite trail here.</p>
-            {/if}
+            <div class="highlights">
+                <div>
+                    <span class="label">Highest rated hike</span>
+                    {#if topRated}
+                        {@render highlight(topRated, formatStars(topRated.rating))}
+                    {:else}
+                        <p class="empty">Rate a hike to see your favorite trail here.</p>
+                    {/if}
+                </div>
+                <div>
+                    <span class="label">Longest hike</span>
+                    {#if longest}
+                        {@render highlight(longest, formatMiles(longest.distance ?? 0))}
+                    {:else}
+                        <p class="empty">Add a distance to a hike to see your longest trail here.</p>
+                    {/if}
+                </div>
+            </div>
+            <MoreStats {hikes}/>
         </main>
     {:else}
         <GalleryView {hikes} {search} favoritesOnly={view === "favorites"} onopen={openHike} />
@@ -435,6 +466,12 @@
         gap: 10px;
         margin-top: 24px;
     }
+
+    .highlights{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+        gap: 22px;
+    }/*side by side, if not, stack*/
 
     .top_rated{
         display: flex;

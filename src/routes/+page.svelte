@@ -122,7 +122,7 @@
 
         {#if showSearch}
             <div class="actions">
-                <input type="search" placeholder="Search by trail name..." bind:value={search} />
+                <input type="search" placeholder="Search trails..." bind:value={search} />
                 <button class="orange" onclick={() => go("add")}>+ Log a Hike</button>
             </div>
         {/if}
@@ -497,12 +497,16 @@
         }
 
         .topbar{
+            flex-wrap: nowrap;
+            gap: 10px;
             padding: 10px 16px;
         }
 
         .hamburger{
             display: block;
-        }
+            flex-shrink: 0;
+            height: 36px;
+        } /*Same height as the search bar so that they line up */
 
         .links{
             display: none;
@@ -527,8 +531,14 @@
         }
 
         .actions{
-            width: 100%;
-        }
+            flex: 1;
+            min-width: 0;
+        }/*fills the space next to the hamburger */
+
+        .actions .orange{
+            flex-shrink: 0;
+            white-space: nowrap;
+        }/*Shrink the search bar, not the button*/
 
         .actions input{
             flex: 1;
